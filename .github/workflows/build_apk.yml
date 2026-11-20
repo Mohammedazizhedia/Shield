@@ -29,6 +29,9 @@ jobs:
         with:
           channel: "stable"
 
+      - name: Accept Android Licenses
+        run: yes | flutter doctor --android-licenses || true
+
       - name: Install Flet
         run: |
           pip install --upgrade pip
