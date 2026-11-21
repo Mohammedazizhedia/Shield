@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Midnight Gold",
+  "mode": "DARK",
+  "colors": {
+    "primary": "#D4AF37",
+    "secondary": "#3A4A6B",
+    "accent": "#4DE1E1",
+    "background": "#0B1B3A",
+    "surface": "#13264D",
+    "onPrimary": "#FFFFFF",
+    "onBackground": "#FFF8DC",
+    "onSurface": "#FFF8DC",
+    "error": "#FF5A5F",
+    "success": "#2ECC71",
+    "warning": "#F5A623"
+  }
+}

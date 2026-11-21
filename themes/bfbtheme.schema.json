@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BFB Theme",
+  "type": "object",
+  "required": ["schema", "name", "mode", "colors"],
+  "properties": {
+    "schema": { "type": "integer", "const": 1 },
+    "name": { "type": "string", "maxLength": 64 },
+    "mode": { "type": "string", "enum": ["LIGHT", "DARK", "AMOLED", "SYSTEM"] },
+    "colors": {
+      "type": "object",
+      "required": ["primary", "secondary", "accent", "background", "surface"],
+      "properties": {
+        "primary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "secondary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "accent": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "background": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "surface": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "onPrimary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "onBackground": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "onSurface": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "error": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "success": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "warning": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

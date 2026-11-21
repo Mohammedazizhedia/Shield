@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Shield Default",
+  "mode": "SYSTEM",
+  "colors": {
+    "primary": "#00A6A6",
+    "secondary": "#0B1B3A",
+    "accent": "#00D4AA",
+    "background": "#F5F7FA",
+    "surface": "#FFFFFF",
+    "onPrimary": "#FFFFFF",
+    "onBackground": "#0B1B3A",
+    "onSurface": "#0B1B3A",
+    "error": "#FF5A5F",
+    "success": "#2ECC71",
+    "warning": "#F5A623"
+  }
+}
