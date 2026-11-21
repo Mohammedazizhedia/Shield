@@ -10,8 +10,7 @@ on:
 
 permissions:
   contents: write
-  workflows: write   # <-- هذا السطر هو الحل
-
+  
 jobs:
   build:
     name: Build Debug APK
