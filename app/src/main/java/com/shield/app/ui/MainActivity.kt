@@ -1,9 +1,12 @@
 // Built with BFB.AI — Built For Benefits, by AI
 package com.shield.app.ui
 
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,11 +19,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.MaterialToolbar
 import com.shield.app.R
+import com.shield.app.ShieldApp
 import com.shield.app.data.SettingsManager
 import com.shield.app.data.theme.ThemeRepository
 import com.shield.app.service.PrivacyOverlayService
+import com.shield.app.service.PrivacyTileService
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -47,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         settings = SettingsManager(this)
-        themeRepo = (application as com.shield.app.ShieldApp).themeRepo
+        themeRepo = (application as ShieldApp).themeRepo
         bindViews(); setupToolbar(); setupPermission(); setupTile(); setupPattern()
         setupSliders(); setupColor(); setupSwitch(); setupNavButtons()
         observeTheme(); refreshUI()
@@ -73,7 +77,25 @@ class MainActivity : AppCompatActivity() {
     }
     private fun setupTile() {
         btnAddTile.setOnClickListener {
-            try { startActivity(Intent(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Settings.ACTION_EDIT_TILE else Settings.ACTION_QUICK_SETTINGS_SETTINGS)) } catch (_: Exception) {}
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val statusBarManager = getSystemService(StatusBarManager::class.java)
+                    val componentName = ComponentName(this, PrivacyTileService::class.java)
+                    statusBarManager?.requestAddTileService(
+                        componentName,
+                        getString(R.string.tile_label),
+                        Icon.createWithResource(this, R.drawable.ic_shield_tile),
+                        { command -> command.run() },
+                        {}
+                    )
+                } else {
+                    startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.parse("package:$packageName")
+                        }
+                    )
+                }
+            } catch (_: Exception) {}
         }
     }
     private fun setupPattern() {
@@ -162,5 +184,5 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i) else startService(i)
     }
     private fun stopOverlay() { stopService(Intent(this, PrivacyOverlayService::class.java)) }
-    private fun refreshOverlay() { if (settings.isEnabled()) try { startService(Intent(this, PrivacyOverlayService::class.java)) } catch (_: Exception) {} }
+    private fun refreshOverlay() { if (settings.isEnabled()) try { startOverlay() } catch (_: Exception) {} }
 }

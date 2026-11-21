@@ -9,11 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.lifecycle.lifecycleScope
 import com.shield.app.R
+import com.shield.app.ShieldApp
 import com.shield.app.data.theme.BuiltInThemes
 import com.shield.app.data.theme.ThemeConfig
 import com.shield.app.data.theme.ThemeImporter
 import com.shield.app.data.theme.ThemeMode
 import com.shield.app.data.theme.ThemeRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class AppearanceActivity : AppCompatActivity() {
@@ -31,7 +33,7 @@ class AppearanceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_appearance)
-        themeRepo = (application as com.shield.app.ShieldApp).themeRepo
+        themeRepo = (application as ShieldApp).themeRepo
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.appearance)
@@ -56,7 +58,7 @@ class AppearanceActivity : AppCompatActivity() {
                 else -> ThemeMode.SYSTEM
             }
             lifecycleScope.launch {
-                val current = getCurrentConfig()
+                val current = themeRepo.configFlow.first()
                 themeRepo.saveConfig(current.copy(mode = mode))
             }
         }
@@ -65,7 +67,7 @@ class AppearanceActivity : AppCompatActivity() {
 
         btnExport.setOnClickListener {
             lifecycleScope.launch {
-                val config = getCurrentConfig()
+                val config = themeRepo.configFlow.first()
                 val json = ThemeImporter.exportToJson(config)
                 val file = java.io.File(filesDir, "current_theme.bfbtheme")
                 file.writeText(json)
@@ -76,12 +78,6 @@ class AppearanceActivity : AppCompatActivity() {
         btnImport.setOnClickListener {
             android.widget.Toast.makeText(this, R.string.import_coming_soon, android.widget.Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private suspend fun getCurrentConfig(): ThemeConfig {
-        var result = BuiltInThemes.DEFAULT
-        themeRepo.configFlow.collect { result = it }
-        return result
     }
 
     private fun applyConfig(config: ThemeConfig) {

@@ -1,7 +1,6 @@
 // Built with BFB.AI — Built For Benefits, by AI
 package com.shield.app.core
 
-import android.util.Log
 import java.io.File
 
 object SecurityChecks {
