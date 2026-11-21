@@ -1480,6 +1480,32 @@ class AboutActivity : AppCompatActivity() {
 
 ## البناء من المصدر
 ```bash
-git clone [https://github.com/Mohammedazizhedia/Shield.git](https://github.com/Mohammedazizhedia/Shield.git)
+git clone https://github.com/Mohammedazizhedia/Shield.git
 cd Shield
 ./gradlew assembleDebug
+""",
+}.
+def create_files():
+    print("=" * 60)
+    print("Shield Project Generator — BFB.AI Edition")
+    print("=" * 60)
+    count = 0
+    for rel_path, content in FILES.items():
+        full_path = rel_path
+        os.makedirs(os.path.dirname(full_path) if os.path.dirname(full_path) else ".", exist_ok=True)
+        with open(full_path, "w", encoding="utf-8") as f:
+            f.write(content.lstrip("\n"))
+        count += 1
+        print(f"  [{count:02d}] {rel_path}")
+    print(f"\nتم إنشاء {count} ملف بنجاح!")
+    return count
+
+
+if __name__ == "__main__":
+    c = create_files()
+    print("\n" + "=" * 60)
+    print(f"Shield BFB.AI — {c} files ready")
+    print("=" * 60)
+ 
+
+
