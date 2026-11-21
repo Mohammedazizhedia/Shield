@@ -1,0 +1,94 @@
+name: Build Shield APK (BFB.AI)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths-ignore: [ '**.md', 'LICENSE', 'assets/**', 'themes/**' ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # 1. تنزيل المستودع
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. تثبيت Java 17 (ضروري قبل أي أمر Gradle)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3. تثبيت Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 4. تشغيل السكريبت لإنشاء كل ملفات المشروع
+      - name: Generate project files
+        run: python setup_project.py
+
+      # 5. توليد Gradle Wrapper (ضروري للبناء)
+      - name: Generate Gradle Wrapper
+        run: |
+          curl -sL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp/
+          /tmp/gradle-8.7/bin/gradle wrapper --gradle-version 8.7
+          chmod +x gradlew
+          echo "✅ Gradle wrapper generated with JDK 17"
+
+      # 6. رفع الملفات الجديدة للمستودع
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "chore: regenerate project files (BFB.AI)"
+          git push
+
+      # 7. بناء APK
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      # 8. تجهيز الملفات للتحميل
+      - name: Prepare artifacts
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk artifacts/Shield_v1.0.0_build001.apk
+          echo "BFB.AI" > artifacts/BFB.txt
+          echo "Built For Benefits, by AI" >> artifacts/BFB.txt
+          echo "Version: 1.0.0   Build: 001" >> artifacts/BFB.txt
+          echo "✅ Artifacts prepared"
+
+      # 9. رفع APK + ملفات BFB
+      - name: Upload APK and BFB files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shield-APK-BFB
+          path: artifacts/
+          retention-days: 30
+          if-no-files-found: error
+
+      # 10. طباعة معلومات النجاح
+      - name: Build Summary
+        if: success()
+        run: |
+          echo "## ✅ Build Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Application:** Shield v1.0.0" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Number:** 001" >> $GITHUB_STEP_SUMMARY
+          echo "**Built with:** BFB.AI" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Download" >> $GITHUB_STEP_SUMMARY
+          echo "Go to **Actions → This run → Artifacts → Shield-APK-BFB** to download the APK." >> $GITHUB_STEP_SUMMARY
