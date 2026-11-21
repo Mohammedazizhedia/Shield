@@ -5,7 +5,7 @@ Shield Project Auto-Generator — BFB.AI Edition
 Built with BFB.AI — Built For Benefits, by AI
 ينشئ مشروع Shield كاملاً بمعيار BFB.AI v4.3
 """
-import os, sys
+import os
 
 BFB_HEADER = "// Built with BFB.AI — Built For Benefits, by AI\n"
 
@@ -1458,27 +1458,27 @@ class AboutActivity : AppCompatActivity() {
 """,
 
     # ============ Documentation ============
-    "README.md": """# 🛡️ Shield — Privacy Screen Protector
+    "README.md": """# Shield — Privacy Screen Protector
 
 > BFB.AI · Built For Benefits, by AI
 
 تطبيق أندرويد خفيف يوفّر طبقة خصوصية فوق الشاشة (Privacy Overlay) تُفعَّل بضغطة واحدة من **الإعدادات السريعة** (Quick Settings Tile).
 
-## ✨ المميزات
-- ⚡ **تشغيل بضغطة واحدة** من Quick Settings Tile
-- 🎨 **4 أنماط للخصوصية**: ستارة كاملة، شبكة خطية، شبكة نقطية، منطقة تركيز
-- 🌈 **تخصيص كامل للألوان** والشفافية والكثافة
-- 🎭 **6 ثيمات جاهزة** + تصدير/استيراد ثيمات `.bfbtheme`
-- 🌙 **دعم الوضع الليلي والنهاري + AMOLED**
-- 🌐 **دعم العربية (RTL) والإنجليزية (LTR)**
-- 📱 **يعمل على Android 7.0+ و HarmonyOS**
-- 🚫 **بدون Google Play Services** — مستقل تماماً
-- 🔒 **توقيع BFB.AI** في كل مكان
+## المميزات
+- تشغيل بضغطة واحدة من Quick Settings Tile
+- 4 أنماط للخصوصية: ستارة كاملة، شبكة خطية، شبكة نقطية، منطقة تركيز
+- تخصيص كامل للألوان والشفافية والكثافة
+- 6 ثيمات جاهزة + تصدير/استيراد ثيمات `.bfbtheme`
+- دعم الوضع الليلي والنهاري + AMOLED
+- دعم العربية (RTL) والإنجليزية (LTR)
+- يعمل على Android 7.0+ و HarmonyOS
+- بدون Google Play Services — مستقل تماماً
+- توقيع BFB.AI في كل مكان
 
-## 📲 التثبيت
+## التثبيت
 حمّل APK من **Actions → Artifacts** بعد نجاح الـ workflow.
 
-## 🛠️ البناء من المصدر
+## البناء من المصدر
 ```bash
 git clone [https://github.com/Mohammedazizhedia/Shield.git](https://github.com/Mohammedazizhedia/Shield.git)
 cd Shield
