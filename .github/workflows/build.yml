@@ -3,14 +3,13 @@ name: Build Shield APK (BFB.AI)
 on:
   push:
     branches: [ "main", "master" ]
-    paths-ignore: [ '**.md', 'LICENSE', 'assets/**', 'themes/**' ]
+    paths-ignore: [ "**.md", "LICENSE", "assets/**", "themes/**" ]
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
 permissions:
   contents: write
-  workflows: write
 
 jobs:
   build:
@@ -22,40 +21,47 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # جلب كامل السجل لتجنب مشاكل الـ rebase
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle"
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Generate project files
         run: python setup_project.py
 
-      - name: Generate Gradle Wrapper
+      - name: Ensure Gradle Wrapper exists
         run: |
-          curl -sL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
-          unzip -q /tmp/gradle.zip -d /tmp/
-          /tmp/gradle-8.7/bin/gradle wrapper --gradle-version 8.7
+          if [ ! -f "./gradlew" ]; then
+            curl -fsSL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
+            unzip -q /tmp/gradle.zip -d /tmp/
+            /tmp/gradle-8.7/bin/gradle wrapper --gradle-version 8.7
+            rm -rf /tmp/gradle.zip /tmp/gradle-8.7
+          fi
           chmod +x gradlew
-          echo "✅ Gradle wrapper generated"
+          echo "✅ Gradle wrapper ready"
 
       - name: Commit generated files
+        if: github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add -A
           if ! git diff --staged --quiet; then
-            echo "Changes detected. Committing and pushing..."
-            git commit -m "chore: regenerate project files (BFB.AI)"
-            git pull --rebase origin main
-            git push origin main
+            TARGET_BRANCH="${GITHUB_REF#refs/heads/}"
+            echo "Changes detected. Committing and pushing to ${TARGET_BRANCH}..."
+            git commit -m "chore: regenerate project files (BFB.AI) [skip ci]"
+            git pull --rebase origin "${TARGET_BRANCH}"
+            git push origin "HEAD:${TARGET_BRANCH}"
             echo "✅ Files pushed successfully"
           else
             echo "✅ No changes to commit."
@@ -68,9 +74,11 @@ jobs:
         run: |
           mkdir -p artifacts
           cp app/build/outputs/apk/debug/app-debug.apk artifacts/Shield_v1.0.0_build001.apk
-          echo "BFB.AI" > artifacts/BFB.txt
-          echo "Built For Benefits, by AI" >> artifacts/BFB.txt
-          echo "Version: 1.0.0   Build: 001" >> artifacts/BFB.txt
+          {
+            echo "BFB.AI"
+            echo "Built For Benefits, by AI"
+            echo "Version: 1.0.0   Build: 001"
+          } > artifacts/BFB.txt
           echo "✅ Artifacts prepared"
 
       - name: Upload APK
