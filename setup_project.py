@@ -231,13 +231,7 @@ import java.io.StringWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * Smart Crash & Error Monitoring — BFB.AI section 10
- * يلتقط الأخطاء غير المعالجة ويحفظها محلياً مع Breadcrumbs.
- * لا إرسال تلقائي — المستخدم يتحكم من Settings → Privacy → Error Reporting.
- */
 object CrashReporter {
-
     private const val TAG = "CrashReporter"
     private const val PREFS = "shield_crash_prefs"
     private const val KEY_ENABLED = "error_reporting_enabled"
@@ -306,7 +300,6 @@ object CrashReporter {
 
     # ============ Theme System (4.9) ============
     "app/src/main/java/com/shield/app/data/theme/ThemeMode.kt": BFB_HEADER + """package com.shield.app.data.theme
-
 enum class ThemeMode { LIGHT, DARK, AMOLED, SYSTEM }
 """,
 
@@ -345,72 +338,31 @@ enum class MotionLevel { FULL, REDUCED, NONE }
 
     "app/src/main/java/com/shield/app/data/theme/BuiltInThemes.kt": BFB_HEADER + """package com.shield.app.data.theme
 
-/**
- * 6 ثيمات جاهزة مصممة باحتراف — BFB.AI section 4.9-أ
- */
 object BuiltInThemes {
-
     val DEFAULT = ThemeConfig(
-        name = "Shield Default",
-        mode = ThemeMode.SYSTEM,
-        colors = ThemeColors(
-            primary = 0xFF00A6A6, secondary = 0xFF0B1B3A, accent = 0xFF00D4AA,
-            background = 0xFFF5F7FA, surface = 0xFFFFFFFF,
-            onBackground = 0xFF0B1B3A, onSurface = 0xFF0B1B3A
-        )
+        name = "Shield Default", mode = ThemeMode.SYSTEM,
+        colors = ThemeColors(primary = 0xFF00A6A6, secondary = 0xFF0B1B3A, accent = 0xFF00D4AA, background = 0xFFF5F7FA, surface = 0xFFFFFFFF, onBackground = 0xFF0B1B3A, onSurface = 0xFF0B1B3A)
     )
-
     val LIGHT = ThemeConfig(
-        name = "Light",
-        mode = ThemeMode.LIGHT,
-        colors = ThemeColors(
-            primary = 0xFF00A6A6, secondary = 0xFF1E3A5F, accent = 0xFF00D4AA,
-            background = 0xFFF5F7FA, surface = 0xFFFFFFFF,
-            onBackground = 0xFF0B1B3A, onSurface = 0xFF0B1B3A
-        )
+        name = "Light", mode = ThemeMode.LIGHT,
+        colors = ThemeColors(primary = 0xFF00A6A6, secondary = 0xFF1E3A5F, accent = 0xFF00D4AA, background = 0xFFF5F7FA, surface = 0xFFFFFFFF, onBackground = 0xFF0B1B3A, onSurface = 0xFF0B1B3A)
     )
-
     val DARK = ThemeConfig(
-        name = "Dark",
-        mode = ThemeMode.DARK,
-        colors = ThemeColors(
-            primary = 0xFF4DE1E1, secondary = 0xFF1E3A5F, accent = 0xFF00FFCC,
-            background = 0xFF0B1B3A, surface = 0xFF13264D,
-            onBackground = 0xFFFFFFFF, onSurface = 0xFFFFFFFF
-        )
+        name = "Dark", mode = ThemeMode.DARK,
+        colors = ThemeColors(primary = 0xFF4DE1E1, secondary = 0xFF1E3A5F, accent = 0xFF00FFCC, background = 0xFF0B1B3A, surface = 0xFF13264D, onBackground = 0xFFFFFFFF, onSurface = 0xFFFFFFFF)
     )
-
     val AMOLED = ThemeConfig(
-        name = "AMOLED",
-        mode = ThemeMode.AMOLED,
-        colors = ThemeColors(
-            primary = 0xFF4DE1E1, secondary = 0xFF000000, accent = 0xFF00FFCC,
-            background = 0xFF000000, surface = 0xFF0A0A0A,
-            onBackground = 0xFFFFFFFF, onSurface = 0xFFFFFFFF
-        )
+        name = "AMOLED", mode = ThemeMode.AMOLED,
+        colors = ThemeColors(primary = 0xFF4DE1E1, secondary = 0xFF000000, accent = 0xFF00FFCC, background = 0xFF000000, surface = 0xFF0A0A0A, onBackground = 0xFFFFFFFF, onSurface = 0xFFFFFFFF)
     )
-
     val HIGH_CONTRAST = ThemeConfig(
-        name = "High Contrast",
-        mode = ThemeMode.DARK,
-        colors = ThemeColors(
-            primary = 0xFFFFD700, secondary = 0xFF000000, accent = 0xFF00FF00,
-            background = 0xFF000000, surface = 0xFF000000,
-            onBackground = 0xFFFFFFFF, onSurface = 0xFFFFFFFF,
-            error = 0xFFFF4444, success = 0xFF00FF00, warning = 0xFFFFFF00
-        )
+        name = "High Contrast", mode = ThemeMode.DARK,
+        colors = ThemeColors(primary = 0xFFFFD700, secondary = 0xFF000000, accent = 0xFF00FF00, background = 0xFF000000, surface = 0xFF000000, onBackground = 0xFFFFFFFF, onSurface = 0xFFFFFFFF, error = 0xFFFF4444, success = 0xFF00FF00, warning = 0xFFFFFF00)
     )
-
     val MIDNIGHT_GOLD = ThemeConfig(
-        name = "Midnight Gold",
-        mode = ThemeMode.DARK,
-        colors = ThemeColors(
-            primary = 0xFFD4AF37, secondary = 0xFF3A4A6B, accent = 0xFF4DE1E1,
-            background = 0xFF0B1B3A, surface = 0xFF13264D,
-            onBackground = 0xFFFFF8DC, onSurface = 0xFFFFF8DC
-        )
+        name = "Midnight Gold", mode = ThemeMode.DARK,
+        colors = ThemeColors(primary = 0xFFD4AF37, secondary = 0xFF3A4A6B, accent = 0xFF4DE1E1, background = 0xFF0B1B3A, surface = 0xFF13264D, onBackground = 0xFFFFF8DC, onSurface = 0xFFFFF8DC)
     )
-
     val all: List<ThemeConfig> = listOf(DEFAULT, LIGHT, DARK, AMOLED, HIGH_CONTRAST, MIDNIGHT_GOLD)
 }
 """,
@@ -421,12 +373,7 @@ import android.util.Log
 import org.json.JSONObject
 import java.security.MessageDigest
 
-/**
- * استيراد/تصدير ثيمات .bfbtheme — BFB.AI section 4.9-هـ
- * أمان: JSON فقط، حد 64KB، schema validation، رفض الحقول غير المعروفة.
- */
 object ThemeImporter {
-
     private const val MAX_SIZE = 64 * 1024
     private const val TAG = "ThemeImporter"
 
@@ -459,12 +406,7 @@ object ThemeImporter {
             val modeStr = root.optString("mode", "SYSTEM")
             val mode = try { ThemeMode.valueOf(modeStr) } catch (e: Exception) { ThemeMode.SYSTEM }
 
-            val theme = ThemeConfig(
-                schema = schema,
-                name = root.optString("name", "Imported"),
-                mode = mode,
-                colors = colors
-            )
+            val theme = ThemeConfig(schema = schema, name = root.optString("name", "Imported"), mode = mode, colors = colors)
             ValidationResult(true, theme)
         } catch (e: Exception) {
             Log.e(TAG, "Parse error", e)
@@ -516,11 +458,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "shield_theme")
 
-/**
- * مصدر واحد للحقيقة للمظهر — BFB.AI section 4.9-و
- */
 class ThemeRepository(private val context: Context) {
-
     private val KEY_MODE = stringPreferencesKey("theme_mode")
     private val KEY_NAME = stringPreferencesKey("theme_name")
     private val KEY_PRIMARY = longPreferencesKey("theme_primary")
@@ -577,23 +515,12 @@ class ThemeRepository(private val context: Context) {
     # ============ Security ============
     "app/src/main/java/com/shield/app/core/SecurityChecks.kt": BFB_HEADER + """package com.shield.app.core
 
-import android.os.Build
 import android.util.Log
 import java.io.File
 
-/**
- * فحوصات أمنية محلية — BFB.AI section 9
- * Root detection + Debugger detection (تنبيه فقط، لا إغلاق قسري).
- */
 object SecurityChecks {
-
     private const val TAG = "SecurityChecks"
-
-    data class SecurityReport(
-        val isRooted: Boolean,
-        val isDebugger: Boolean,
-        val recommendations: List<String>
-    )
+    data class SecurityReport(val isRooted: Boolean, val isDebugger: Boolean, val recommendations: List<String>)
 
     fun runChecks(): SecurityReport {
         val rooted = checkRoot()
@@ -606,9 +533,7 @@ object SecurityChecks {
     }
 
     private fun checkRoot(): Boolean {
-        val paths = listOf("/system/app/Superuser.apk", "/sbin/su", "/system/bin/su",
-            "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su",
-            "/system/sd/xbin/su", "/system/bin/failsafe/su", "/data/local/su")
+        val paths = listOf("/system/app/Superuser.apk", "/sbin/su", "/system/bin/su", "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su", "/system/sd/xbin/su", "/system/bin/failsafe/su", "/data/local/su")
         return paths.any { File(it).exists() }
     }
 }
@@ -710,7 +635,6 @@ class PrivacyOverlayView(context: Context) : View(context) {
 
     "app/src/main/java/com/shield/app/service/PrivacyOverlayService.kt": BFB_HEADER + """package com.shield.app.service
 
-import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -823,8 +747,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.shield.app.R
 import com.shield.app.data.SettingsManager
-import com.shield.app.data.theme.BuiltInThemes
-import com.shield.app.data.theme.ThemeConfig
 import com.shield.app.data.theme.ThemeRepository
 import com.shield.app.service.PrivacyOverlayService
 import kotlinx.coroutines.launch
@@ -874,20 +796,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() { setSupportActionBar(findViewById(R.id.toolbar)) }
-
     private fun setupPermission() {
-        btnPermission.setOnClickListener {
-            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
-        }
+        btnPermission.setOnClickListener { startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))) }
     }
-
     private fun setupTile() {
         btnAddTile.setOnClickListener {
-            try { startActivity(Intent(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Settings.ACTION_EDIT_TILE else Settings.ACTION_QUICK_SETTINGS_SETTINGS)) }
-            catch (_: Exception) {}
+            try { startActivity(Intent(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Settings.ACTION_EDIT_TILE else Settings.ACTION_QUICK_SETTINGS_SETTINGS)) } catch (_: Exception) {}
         }
     }
-
     private fun setupPattern() {
         findViewById<android.widget.RadioGroup>(R.id.radioGroupPattern).setOnCheckedChangeListener { _, id ->
             val p = when (id) {
@@ -900,7 +816,6 @@ class MainActivity : AppCompatActivity() {
             settings.setPattern(p); refreshOverlay()
         }
     }
-
     private fun setupSliders() {
         seekOpacity.max = 100; seekDensity.max = 100
         seekOpacity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -920,15 +835,12 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(s: SeekBar?) {}
         })
     }
-
     private fun setupColor() {
         btnPickOverlay.setOnClickListener {
-            // Color picker بسيط — يفتح Intent اختيار لون
             val i = Intent(Intent.ACTION_PICK).setType("image/*")
             try { startActivity(i) } catch (_: Exception) {}
         }
     }
-
     private fun setupSwitch() {
         switchEnable.setOnCheckedChangeListener { _, on ->
             if (on && !Settings.canDrawOverlays(this)) {
@@ -941,22 +853,13 @@ class MainActivity : AppCompatActivity() {
             updateStatus()
         }
     }
-
     private fun setupNavButtons() {
-        btnAppearance.setOnClickListener {
-            startActivity(Intent(this, AppearanceActivity::class.java))
-        }
-        btnAbout.setOnClickListener {
-            startActivity(Intent(this, AboutActivity::class.java))
-        }
+        btnAppearance.setOnClickListener { startActivity(Intent(this, AppearanceActivity::class.java)) }
+        btnAbout.setOnClickListener { startActivity(Intent(this, AboutActivity::class.java)) }
     }
-
     private fun observeTheme() {
-        lifecycleScope.launch {
-            themeRepo.configFlow.collect { /* Theme applied via ThemeManager */ }
-        }
+        lifecycleScope.launch { themeRepo.configFlow.collect { /* Theme applied via ThemeManager */ } }
     }
-
     private fun refreshUI() {
         when (settings.getPattern()) {
             SettingsManager.PATTERN_SOLID -> radioSolid.isChecked = true
@@ -975,18 +878,13 @@ class MainActivity : AppCompatActivity() {
         switchEnable.isChecked = settings.isEnabled()
         updateStatus()
     }
-
     private fun updateStatus() {
         statusText.text = getString(if (settings.isEnabled()) R.string.status_on else R.string.status_off)
         statusText.setTextColor(if (settings.isEnabled()) Color.parseColor("#2ECC71") else Color.parseColor("#FF5A5F"))
     }
-
     private fun applyColorPreview(v: View, color: Int) {
-        v.background = GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE; setColor(color); setStroke(2, Color.GRAY); cornerRadius = 16f
-        }
+        v.background = GradientDrawable().apply { shape = GradientDrawable.RECTANGLE; setColor(color); setStroke(2, Color.GRAY); cornerRadius = 16f }
     }
-
     private fun startOverlay() {
         val i = Intent(this, PrivacyOverlayService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i) else startService(i)
@@ -1013,10 +911,6 @@ import com.shield.app.data.theme.ThemeMode
 import com.shield.app.data.theme.ThemeRepository
 import kotlinx.coroutines.launch
 
-/**
- * شاشة المظهر — BFB.AI section 4.9
- * ثيمات + ألوان + استيراد/تصدير .bfbtheme
- */
 class AppearanceActivity : AppCompatActivity() {
     private lateinit var themeRepo: ThemeRepository
     private lateinit var radioGroup: RadioGroup
@@ -1047,9 +941,7 @@ class AppearanceActivity : AppCompatActivity() {
         btnImport = findViewById(R.id.btnImport)
         previewText = findViewById(R.id.previewText)
 
-        lifecycleScope.launch {
-            themeRepo.configFlow.collect { config -> applyConfig(config) }
-        }
+        lifecycleScope.launch { themeRepo.configFlow.collect { config -> applyConfig(config) } }
 
         radioGroup.setOnCheckedChangeListener { _, id ->
             val mode = when (id) {
@@ -1064,24 +956,19 @@ class AppearanceActivity : AppCompatActivity() {
             }
         }
 
-        btnReset.setOnClickListener {
-            lifecycleScope.launch { themeRepo.saveConfig(BuiltInThemes.DEFAULT) }
-        }
+        btnReset.setOnClickListener { lifecycleScope.launch { themeRepo.saveConfig(BuiltInThemes.DEFAULT) } }
 
         btnExport.setOnClickListener {
             lifecycleScope.launch {
                 val config = getCurrentConfig()
                 val json = ThemeImporter.exportToJson(config)
-                // حفظ في ملفات التطبيق
                 val file = java.io.File(filesDir, "current_theme.bfbtheme")
                 file.writeText(json)
-                android.widget.Toast.makeText(this@AppearanceActivity,
-                    getString(R.string.theme_exported_to, file.absolutePath), android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(this@AppearanceActivity, getString(R.string.theme_exported_to, file.absolutePath), android.widget.Toast.LENGTH_LONG).show()
             }
         }
 
         btnImport.setOnClickListener {
-            // في الإصدار الكامل: File Picker + Schema Validation
             android.widget.Toast.makeText(this, R.string.import_coming_soon, android.widget.Toast.LENGTH_SHORT).show()
         }
     }
@@ -1113,9 +1000,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.shield.app.R
 
-/**
- * شاشة حول — تتضمن توقيع BFB.AI (section 16)
- */
 class AboutActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1686,77 +1570,6 @@ MIT License
 
 ---
 *Built with BFB.AI — Built For Benefits, by AI*
-""",
-
-    ".github/workflows/build.yml": """name: Build Shield APK (BFB.AI)
-
-on:
-  push:
-    branches: [ "main", "master" ]
-    paths-ignore: [ '**.md', 'LICENSE', 'assets/**', 'themes/**' ]
-  pull_request:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-jobs:
-  build:
-    name: Build Debug APK
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Generate project files
-        run: python setup_project.py
-
-      - name: Generate Gradle Wrapper
-        run: |
-          curl -sL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
-          unzip -q /tmp/gradle.zip -d /tmp/
-          /tmp/gradle-8.7/bin/gradle wrapper --gradle-version 8.7
-          chmod +x gradlew
-
-      - name: Commit generated files
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git diff --staged --quiet || git commit -m "chore: regenerate project files (BFB.AI)"
-          git push
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Prepare artifact
-        run: |
-          mkdir -p artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk artifacts/Shield_v1.0.0_build001.apk
-          echo "BFB.AI" > artifacts/BFB.txt
-          echo "Built For Benefits, by AI" >> artifacts/BFB.txt
-          echo "Version: 1.0.0   Build: 001" >> artifacts/BFB.txt
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Shield-APK
-          path: artifacts/
-          retention-days: 30
 """
 }
 
