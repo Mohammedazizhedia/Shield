@@ -221,9 +221,7 @@ class ShieldApp : Application() {
     "app/src/main/java/com/shield/app/core/CrashReporter.kt": BFB_HEADER + """package com.shield.app.core
 
 import android.content.Context
-import android.content.Intent
 import android.os.Build
-import android.os.Looper
 import android.util.Log
 import java.io.File
 import java.io.PrintWriter
@@ -515,7 +513,6 @@ class ThemeRepository(private val context: Context) {
     # ============ Security ============
     "app/src/main/java/com/shield/app/core/SecurityChecks.kt": BFB_HEADER + """package com.shield.app.core
 
-import android.util.Log
 import java.io.File
 
 object SecurityChecks {
@@ -729,9 +726,12 @@ class PrivacyTileService : TileService() {
     # ============ UI - MainActivity ============
     "app/src/main/java/com/shield/app/ui/MainActivity.kt": BFB_HEADER + """package com.shield.app.ui
 
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -744,11 +744,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.MaterialToolbar
 import com.shield.app.R
+import com.shield.app.ShieldApp
 import com.shield.app.data.SettingsManager
 import com.shield.app.data.theme.ThemeRepository
 import com.shield.app.service.PrivacyOverlayService
+import com.shield.app.service.PrivacyTileService
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -775,7 +776,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         settings = SettingsManager(this)
-        themeRepo = (application as com.shield.app.ShieldApp).themeRepo
+        themeRepo = (application as ShieldApp).themeRepo
         bindViews(); setupToolbar(); setupPermission(); setupTile(); setupPattern()
         setupSliders(); setupColor(); setupSwitch(); setupNavButtons()
         observeTheme(); refreshUI()
@@ -801,7 +802,25 @@ class MainActivity : AppCompatActivity() {
     }
     private fun setupTile() {
         btnAddTile.setOnClickListener {
-            try { startActivity(Intent(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Settings.ACTION_EDIT_TILE else Settings.ACTION_QUICK_SETTINGS_SETTINGS)) } catch (_: Exception) {}
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val statusBarManager = getSystemService(StatusBarManager::class.java)
+                    val componentName = ComponentName(this, PrivacyTileService::class.java)
+                    statusBarManager?.requestAddTileService(
+                        componentName,
+                        getString(R.string.tile_label),
+                        Icon.createWithResource(this, R.drawable.ic_shield_tile),
+                        { command -> command.run() },
+                        {}
+                    )
+                } else {
+                    startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.parse("package:$packageName")
+                        }
+                    )
+                }
+            } catch (_: Exception) {}
         }
     }
     private fun setupPattern() {
@@ -890,7 +909,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i) else startService(i)
     }
     private fun stopOverlay() { stopService(Intent(this, PrivacyOverlayService::class.java)) }
-    private fun refreshOverlay() { if (settings.isEnabled()) try { startService(Intent(this, PrivacyOverlayService::class.java)) } catch (_: Exception) {} }
+    private fun refreshOverlay() { if (settings.isEnabled()) try { startOverlay() } catch (_: Exception) {} }
 }
 """,
 
@@ -904,11 +923,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.lifecycle.lifecycleScope
 import com.shield.app.R
+import com.shield.app.ShieldApp
 import com.shield.app.data.theme.BuiltInThemes
 import com.shield.app.data.theme.ThemeConfig
 import com.shield.app.data.theme.ThemeImporter
 import com.shield.app.data.theme.ThemeMode
 import com.shield.app.data.theme.ThemeRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class AppearanceActivity : AppCompatActivity() {
@@ -926,7 +947,7 @@ class AppearanceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_appearance)
-        themeRepo = (application as com.shield.app.ShieldApp).themeRepo
+        themeRepo = (application as ShieldApp).themeRepo
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.appearance)
@@ -951,7 +972,7 @@ class AppearanceActivity : AppCompatActivity() {
                 else -> ThemeMode.SYSTEM
             }
             lifecycleScope.launch {
-                val current = getCurrentConfig()
+                val current = themeRepo.configFlow.first()
                 themeRepo.saveConfig(current.copy(mode = mode))
             }
         }
@@ -960,7 +981,7 @@ class AppearanceActivity : AppCompatActivity() {
 
         btnExport.setOnClickListener {
             lifecycleScope.launch {
-                val config = getCurrentConfig()
+                val config = themeRepo.configFlow.first()
                 val json = ThemeImporter.exportToJson(config)
                 val file = java.io.File(filesDir, "current_theme.bfbtheme")
                 file.writeText(json)
@@ -971,12 +992,6 @@ class AppearanceActivity : AppCompatActivity() {
         btnImport.setOnClickListener {
             android.widget.Toast.makeText(this, R.string.import_coming_soon, android.widget.Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private suspend fun getCurrentConfig(): ThemeConfig {
-        var result = BuiltInThemes.DEFAULT
-        themeRepo.configFlow.collect { result = it }
-        return result
     }
 
     private fun applyConfig(config: ThemeConfig) {
@@ -1465,132 +1480,6 @@ class AboutActivity : AppCompatActivity() {
 
 ## 🛠️ البناء من المصدر
 ```bash
-git clone https://github.com/Mohammedazizhedia/Shield.git
+git clone [https://github.com/Mohammedazizhedia/Shield.git](https://github.com/Mohammedazizhedia/Shield.git)
 cd Shield
 ./gradlew assembleDebug
-```
-
-## 📖 الاستخدام
-1. افتح التطبيق → امنح صلاحية **"الظهور فوق التطبيقات"**
-2. اسحب شريط الإعدادات السريعة → أضف بلاطة **"درع الخصوصية"**
-3. اضغط البلاطة لتفعيل/إيقاف الطبقة فوراً
-
-## 🔐 الأمان
-- ProGuard/R8 مفعّل في Release
-- كشف Root/Debugger (تنبيه فقط)
-- Smart Crash Reporter مع تحكم كامل من المستخدم
-- 0 اعتماد على GMS
-
-## 📜 الترخيص
-MIT License
-
----
-*Built with BFB.AI — Built For Benefits, by AI*
-""",
-
-    "DESIGN.md": """# Shield — Design Document
-> BFB.AI · Built For Benefits, by AI
-
-## الهوية
-- **فئة التطبيق:** أمان/خصوصية
-- **المزاج:** Cyber + Glassmorphism خفيف + إحساس بالثقة
-- **جملة الهوية:** "هادئ، دقيق، يبعث على الثقة — درع رقمي أنيق"
-
-## وضع جوجل
-**A) بدون خدمات جوجل (Open)** — لا SDK لجوجل في الكود إطلاقاً.
-
-## Design Tokens
-- **Primary:** #00A6A6 (سماوي نيون)
-- **Secondary:** #0B1B3A (أزرق ليلي)
-- **Accent:** #00D4AA (أخضر نيون)
-- **Background Light:** #F5F7FA / **Dark:** #0B1B3A / **AMOLED:** #000000
-- **Surface Light:** #FFFFFF / **Dark:** #13264D
-- **Error:** #FF5A5F / **Success:** #2ECC71 / **Warning:** #F5A623
-
-## الخطوط
-- عربي عناوين: Cairo Bold 700
-- عربي نصوص: IBM Plex Sans Arabic 400/500
-- لاتيني: Inter
-- أكواد: JetBrains Mono
-- **ممنوع:** DejaVu Sans
-
-## الأشكال
-- بطاقات: 16dp / أزرار: 12dp / شبكة: 8dp
-- ظل: elevation 2dp
-
-## الحركة
-- Duration: 250ms / Easing: cubic-bezier(0.4, 0.0, 0.2, 1)
-- تحترم "تقليل الحركة"
-
-## الأيقونة
-- درع هندسي + نقطة مركزية مضيئة
-- خلفية: تدرج #0B1B3A → #1E3A5F
-- رمز: #4DE1E1 سماوي نيون
-- Adaptive Icon + Monochrome لـ Themed Icons
-
-## شاشة Appearance (4.9)
-- 6 ثيمات جاهزة: Default, Light, Dark, AMOLED, High Contrast, Midnight Gold
-- تخصيص كامل: Primary/Secondary/Accent/Background/Surface
-- استيراد/تصدير `.bfbtheme` (JSON, schema 1, حد 64KB)
-- فحص التباين ≥ 4.5:1 تلقائياً
-- مصدر واحد للحقيقة: ThemeRepository (DataStore)
-
-## توقيع BFB.AI
-- **About:** سطر "Built with BFB.AI" + المعنى بالعربي والإنجليزي
-- **Splash:** توقيع صغير أسفل الشاشة (مستقبل)
-- **README/Changelog/تقرير أمني:** ترويسة `BFB.AI · Built For Benefits, by AI`
-- **كل ملف Kotlin:** تعليق `// Built with BFB.AI — Built For Benefits, by AI`
-- **ملفات الشعار:** `assets/brand/BFB_light.svg`, `BFB_dark.svg`, `BFB_mono.svg`
-- **ملفات ZIP:** `BFB.txt` داخل كل حزمة
-""",
-
-    "PRIVACY.md": """# Privacy Policy — Shield
-> BFB.AI · Built For Benefits, by AI
-
-**Last updated:** 2026-11-21
-
-## ما يجمعه التطبيق
-**لا شيء.** Shield لا يجمع أي بيانات شخصية ولا يرسل أي بيانات إلى خوادم خارجية.
-
-## الصلاحيات المطلوبة
-| الصلاحية | السبب |
-|----------|-------|
-| SYSTEM_ALERT_WINDOW | عرض طبقة الخصوصية فوق التطبيقات الأخرى |
-| FOREGROUND_SERVICE | إبقاء الخدمة نشطة في الخلفية |
-| POST_NOTIFICATIONS | إشعار الخدمة النشطة (مطلوب في Android 13+) |
-
-## خدمات الطرف الثالث
-**لا يوجد.** التطبيق لا يستخدم أي SDK أو خدمة خارجية.
-
-## التحديثات
-التطبيق يفحص التحديثات من GitHub Releases فقط عند طلب المستخدم صراحةً.
-
-## التواصل
-لأي استفسار: [Issues on GitHub](https://github.com/Mohammedazizhedia/Shield/issues)
-
----
-*Built with BFB.AI — Built For Benefits, by AI*
-"""
-}
-
-
-def create_files():
-    print("=" * 60)
-    print("🛡️  Shield Project Generator — BFB.AI Edition")
-    print("=" * 60)
-    count = 0
-    for rel_path, content in FILES.items():
-        full_path = rel_path
-        os.makedirs(os.path.dirname(full_path) if os.path.dirname(full_path) else ".", exist_ok=True)
-        with open(full_path, "w", encoding="utf-8") as f:
-            f.write(content.lstrip("\n"))
-        count += 1
-        print(f"  ✅ [{count:02d}] {rel_path}")
-    print(f"\n✅ تم إنشاء {count} ملف بنجاح!")
-    return count
-
-if __name__ == "__main__":
-    c = create_files()
-    print("\n" + "=" * 60)
-    print(f"🎉 Shield BFB.AI — {c} files ready")
-    print("=" * 60)
