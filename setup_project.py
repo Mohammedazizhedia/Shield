@@ -1484,7 +1484,7 @@ git clone https://github.com/Mohammedazizhedia/Shield.git
 cd Shield
 ./gradlew assembleDebug
 """,
-}.
+}
 def create_files():
     print("=" * 60)
     print("Shield Project Generator — BFB.AI Edition")
