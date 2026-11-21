@@ -1,0 +1,71 @@
+name: Build Shield APK (BFB.AI)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths-ignore: [ '**.md', 'LICENSE', 'assets/**', 'themes/**' ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate project files
+        run: python setup_project.py
+
+      - name: Generate Gradle Wrapper
+        run: |
+          curl -sL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp/
+          /tmp/gradle-8.7/bin/gradle wrapper --gradle-version 8.7
+          chmod +x gradlew
+          echo "✅ Gradle wrapper generated"
+
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "chore: regenerate project (BFB.AI)"
+          git push
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk artifacts/Shield_v1.0.0_build001.apk
+          echo "BFB.AI" > artifacts/BFB.txt
+          echo "Built For Benefits, by AI" >> artifacts/BFB.txt
+          echo "Version: 1.0.0   Build: 001" >> artifacts/BFB.txt
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shield-APK-BFB
+          path: artifacts/
+          retention-days: 30
+          if-no-files-found: error
